@@ -8,8 +8,12 @@ if [[ "$1" == "explain" ]]; then
 fi
 
 # CPU Utilization (average over 1 minute)
-CPU_IDLE=$(top -bn1 | grep "Cpu(s)" | awk '{print $8}')
-CPU_USED=$(echo "100 - $CPU_IDLE" | bc)
+CPU_IDLE=$(top -bn1 | grep "Cpu(s)" | awk -F',' '{for(i=1;i<=NF;i++) if($i ~ /id/) print $i}' | awk '{print $1}' | sed 's/id//;s/%//;s/ //g')
+if [[ -z "$CPU_IDLE" ]]; then
+    CPU_USED=0
+else
+    CPU_USED=$(echo "100 - $CPU_IDLE" | bc)
+fi
 
 # Memory Utilization
 MEM_TOTAL=$(free -m | awk '/Mem:/ {print $2}')
